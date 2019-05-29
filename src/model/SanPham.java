@@ -15,16 +15,18 @@ public class SanPham {
     private String loaiSP;
     private String nhaCC;
     private String donVi;
+    private int giaNhap;
     private int giaTien;
     private int soLuong;
     private String hinhAnh;
 
-    public SanPham(String id, String tenSP, String loaiSP, String nhaCC, String donVi, int giaTien, int soLuong, String hinhAnh) {
+    public SanPham(String id, String tenSP, String loaiSP, String nhaCC, String donVi, int giaNhap, int giaTien, int soLuong, String hinhAnh) {
         this.id = id;
         this.tenSP = tenSP;
         this.loaiSP = loaiSP;
         this.nhaCC = nhaCC;
         this.donVi = donVi;
+        this.giaNhap = giaNhap;
         this.giaTien = giaTien;
         this.soLuong = soLuong;
         this.hinhAnh = hinhAnh;
@@ -92,6 +94,14 @@ public class SanPham {
 
     public void setHinhAnh(String hinhAnh) {
         this.hinhAnh = hinhAnh;
+    }
+
+    public int getGiaNhap() {
+        return giaNhap;
+    }
+
+    public void setGiaNhap(int giaNhap) {
+        this.giaNhap = giaNhap;
     }
     
 }

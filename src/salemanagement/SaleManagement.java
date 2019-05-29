@@ -18,8 +18,8 @@ public class SaleManagement {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        QuanLyFrame qlFrame = new QuanLyFrame();
-        qlFrame.display();
+        LoginFrame login = new LoginFrame();
+        login.display();
     }
     
 }

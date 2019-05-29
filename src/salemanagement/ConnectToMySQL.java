@@ -19,6 +19,7 @@ import javax.swing.table.DefaultTableModel;
 import model.ChiTietHD;
 import model.HoaDonBan;
 import model.HoaDonNhap;
+import model.KhachHang;
 import model.NhaCC;
 import model.NhanVien;
 import model.SanPham;
@@ -41,6 +42,7 @@ public class ConnectToMySQL {
     public ConnectToMySQL() {
         connect();
     }
+    
     //Kết nối đến database
     public void connect() {
         try {
@@ -53,6 +55,7 @@ public class ConnectToMySQL {
         }
     }
     
+    //Thực thi truy vấn và gán dữ liệu cho table model
     public DefaultTableModel query(DefaultTableModel model) {
         try {
             model.setRowCount(0);
@@ -83,11 +86,26 @@ public class ConnectToMySQL {
         return model;
     }
     
+    //Lấy sản phẩm theo nhà cung cấp
+    public ArrayList<String> getListSP(String nhaCC) {
+        ArrayList<String> listData = new ArrayList<>();
+        command = "select ten_san_pham from san_pham where ncc = '" + nhaCC + "' order by id";
+        try {
+            result = state.executeQuery(command);
+            while (result.next()) {
+                listData.add(result.getString(1));
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return listData;
+    }
+    
     //Lấy dữ liệu cho bảng chi tiết sản phẩm
     public DefaultTableModel getCTSP(DefaultTableModel model) {
         model.setRowCount(0);
         command = "select sp.id, sp.ten_san_pham, sp.loai_san_pham, ncc.ten_ncc,"
-                + "sp.don_vi, sp.gia_tien, sp.so_luong, sp.hinh_anh from san_pham sp, "
+                + "sp.don_vi, sp.gia_nhap, sp.gia_tien, sp.so_luong, sp.hinh_anh from san_pham sp, "
                 + "nha_cung_cap ncc where sp.ncc = ncc.id order by sp.id";
         query(model);
         return model;
@@ -96,9 +114,10 @@ public class ConnectToMySQL {
     //Lấy dữ liệu cho bảng hóa đơn bán
     public DefaultTableModel getHDB(DefaultTableModel model) {
         model.setRowCount(0);
-        command = "select hdb.id, nv.ho_ten, hdb.ten_khach_hang, hdb.ngay_ban, sum(ctb.so_luong * sp.gia_tien) "
-                + "from hoa_don_ban hdb, chi_tiet_ban ctb, nhan_vien nv,  san_pham sp where hdb.id = ctb.ma_hoa_don "
-                + "and ctb.ma_san_pham = sp.id and hdb.ma_nhan_vien = nv.id group by hdb.id";
+        command = "select hdb.id, nv.ho_ten, kh.ho_ten, hdb.ngay_ban, sum(ctb.so_luong * sp.gia_tien) "
+                + "from hoa_don_ban hdb, chi_tiet_ban ctb, nhan_vien nv, san_pham sp, khach_hang kh "
+                + "where hdb.id = ctb.ma_hoa_don and ctb.ma_san_pham = sp.id and "
+                + "hdb.ma_nhan_vien = nv.id and hdb.ma_khach_hang = kh.id group by hdb.id order by hdb.id";
         query(model);
         return model;
     }
@@ -106,9 +125,10 @@ public class ConnectToMySQL {
     //Lấy dữ liệu cho bảng hóa đơn nhập
     public DefaultTableModel getHDN(DefaultTableModel model) {
         model.setRowCount(0);
-        command = "select hdn.id, nv.ho_ten, ncc.ten_ncc, hdn.ngay_nhap, sum(ctn.so_luong * ctn.gia_nhap) "
-                + "from hoa_don_nhap hdn, chi_tiet_nhap ctn, nhan_vien nv, nha_cung_cap ncc where "
-                + "hdn.id = ctn.ma_hoa_don and hdn.ma_nhan_vien = nv.id and hdn.ncc = ncc.id group by hdn.id";
+        command = "select hdn.id, nv.ho_ten, ncc.ten_ncc, hdn.ngay_nhap, sum(ctn.so_luong * sp.gia_nhap) "
+                + "from hoa_don_nhap hdn, chi_tiet_nhap ctn, nhan_vien nv, nha_cung_cap ncc, "
+                + "san_pham sp where hdn.id = ctn.ma_hoa_don and hdn.ma_nhan_vien = nv.id "
+                + "and ctn.ma_san_pham = sp.id and hdn.ncc = ncc.id group by hdn.id order by hdn.id";
         query(model);
         return model;
     }
@@ -125,7 +145,7 @@ public class ConnectToMySQL {
     //Lấy chi tiết hóa đơn nhập
     public DefaultTableModel getCTHDN(DefaultTableModel model, String maHDN) {
         model.setRowCount(0);
-        command = "select sp.ten_san_pham, sp.don_vi, ctn.gia_nhap, ctn.so_luong, (ctn.gia_nhap * ctn.so_luong) as thanh_tien "
+        command = "select sp.ten_san_pham, sp.don_vi, sp.gia_nhap, ctn.so_luong, (sp.gia_nhap * ctn.so_luong) as thanh_tien "
                 + "from chi_tiet_nhap ctn, san_pham sp where ctn.ma_san_pham = sp.id and ctn.ma_hoa_don = '" + maHDN + "'";
         query(model);
         return model;
@@ -153,10 +173,10 @@ public class ConnectToMySQL {
     //Theo tên nhân viên
     public DefaultTableModel getTKHDB_NV(DefaultTableModel model, String tenNV) {
         model.setRowCount(0);
-        command = "select hdb.id, nv.ho_ten, hdb.ten_khach_hang, hdb.ngay_ban, "
+        command = "select hdb.id, nv.ho_ten, kh.ho_ten, hdb.ngay_ban, "
                 + "sum(ctb.so_luong * sp.gia_tien) from hoa_don_ban hdb, "
-                + "chi_tiet_ban ctb, nhan_vien nv,  san_pham sp where "
-                + "hdb.id = ctb.ma_hoa_don and ctb.ma_san_pham = sp.id and "
+                + "chi_tiet_ban ctb, nhan_vien nv, khach_hang kh, san_pham sp where "
+                + "hdb.id = ctb.ma_hoa_don and ctb.ma_san_pham = sp.id and hdb.ma_khach_hang = kh.id and "
                 + "hdb.ma_nhan_vien = nv.id and nv.ho_ten like '%" + tenNV + "%' group by hdb.id";
         query(model);
         return model;
@@ -165,11 +185,23 @@ public class ConnectToMySQL {
     //Theo tên khách hàng
     public DefaultTableModel getTKHDB_KH(DefaultTableModel model, String tenKH) {
         model.setRowCount(0);
-        command = "select hdb.id, nv.ho_ten, hdb.ten_khach_hang, hdb.ngay_ban, "
+        command = "select hdb.id, nv.ho_ten, kh.ho_ten, hdb.ngay_ban, "
                 + "sum(ctb.so_luong * sp.gia_tien) from hoa_don_ban hdb, "
-                + "chi_tiet_ban ctb, nhan_vien nv,  san_pham sp where "
-                + "hdb.id = ctb.ma_hoa_don and ctb.ma_san_pham = sp.id and "
-                + "hdb.ma_nhan_vien = nv.id and hdb.ten_khach_hang like '%" + tenKH + "%' group by hdb.id";
+                + "chi_tiet_ban ctb, nhan_vien nv,  san_pham sp, khach_hang kh where "
+                + "hdb.id = ctb.ma_hoa_don and ctb.ma_san_pham = sp.id and hdb.ma_khach_hang = kh.id and " 
+                + "hdb.ma_nhan_vien = nv.id and kh.ho_ten like '%" + tenKH + "%' group by hdb.id";
+        query(model);
+        return model;
+    }
+    
+    //Theo ngày
+    public DefaultTableModel getTKHDB_Ngay(DefaultTableModel model, String ngayBan) {
+        model.setRowCount(0);
+        command = "select hdb.id, nv.ho_ten, kh.ho_ten, hdb.ngay_ban, "
+                + "sum(ctb.so_luong * sp.gia_tien) from hoa_don_ban hdb, "
+                + "chi_tiet_ban ctb, nhan_vien nv,  san_pham sp, khach_hang kh where "
+                + "hdb.id = ctb.ma_hoa_don and ctb.ma_san_pham = sp.id and hdb.ma_khach_hang = kh.id and " 
+                + "hdb.ma_nhan_vien = nv.id and hdb.ngay_ban = '" + ngayBan + "' group by hdb.ngay_ban";
         query(model);
         return model;
     }
@@ -179,9 +211,9 @@ public class ConnectToMySQL {
     public DefaultTableModel getTKHDN_NV(DefaultTableModel model, String tenNV) {
         model.setRowCount(0);
         command = "select hdn.id, nv.ho_ten, ncc.ten_ncc, hdn.ngay_nhap, "
-                + "sum(ctn.so_luong * ctn.gia_nhap) from hoa_don_nhap hdn, "
-                + "chi_tiet_nhap ctn, nhan_vien nv, nha_cung_cap ncc where "
-                + "hdn.id = ctn.ma_hoa_don and hdn.ma_nhan_vien = nv.id and "
+                + "sum(ctn.so_luong * sp.gia_nhap) from hoa_don_nhap hdn, "
+                + "chi_tiet_nhap ctn, nhan_vien nv, nha_cung_cap ncc, san_pham sp where "
+                + "hdn.id = ctn.ma_hoa_don and ctn.ma_san_pham = sp.id and hdn.ma_nhan_vien = nv.id and "
                 + "hdn.ncc = ncc.id and nv.ho_ten like '%" + tenNV + "%' group by hdn.id";
         query(model);
         return model;
@@ -190,10 +222,22 @@ public class ConnectToMySQL {
     public DefaultTableModel getTKHDN_NCC(DefaultTableModel model, String tenNCC) {
         model.setRowCount(0);
         command = "select hdn.id, nv.ho_ten, ncc.ten_ncc, hdn.ngay_nhap, "
-                + "sum(ctn.so_luong * ctn.gia_nhap) from hoa_don_nhap hdn, "
-                + "chi_tiet_nhap ctn, nhan_vien nv, nha_cung_cap ncc where "
-                + "hdn.id = ctn.ma_hoa_don and hdn.ma_nhan_vien = nv.id and "
+                + "sum(ctn.so_luong * sp.gia_nhap) from hoa_don_nhap hdn, "
+                + "chi_tiet_nhap ctn, nhan_vien nv, nha_cung_cap ncc, san_pham sp where "
+                + "hdn.id = ctn.ma_hoa_don and hdn.ma_nhan_vien = nv.id and ctn.ma_san_pham = sp.id and "
                 + "hdn.ncc = ncc.id and ncc.ten_ncc like '%" + tenNCC + "%' group by hdn.id";
+        query(model);
+        return model;
+    }
+    
+    //Theo ngày
+    public DefaultTableModel getTKHDN_Ngay(DefaultTableModel model, String ngayNhap) {
+        model.setRowCount(0);
+        command = "select hdn.id, nv.ho_ten, ncc.ten_ncc, hdn.ngay_nhap, "
+                + "sum(ctn.so_luong * sp.gia_nhap) from hoa_don_nhap hdn, "
+                + "chi_tiet_nhap ctn, nhan_vien nv, nha_cung_cap ncc, san_pham sp where "
+                + "hdn.id = ctn.ma_hoa_don and hdn.ma_nhan_vien = nv.id and ctn.ma_san_pham = sp.id and "
+                + "hdn.ncc = ncc.id and hdn.ngay_nhap = '" + ngayNhap + " ' group by hdn.ngay_nhap";
         query(model);
         return model;
     }
@@ -215,7 +259,22 @@ public class ConnectToMySQL {
         return listItem;
     }
     
-    //Lấy mã nhà cung cấp khi biết tên (dùng khi thực hiện việc thêm, cập nhật sản phẩm)
+    //Lấy mã khách hàng khi biết tên
+    public String getMaKH(String tenKH) {
+        String maKH = "";
+        command = "select id from khach_hang where ho_ten = '" + tenKH + "'";
+        try {
+            result = state.executeQuery(command);
+            if (result.next()) {
+                maKH = result.getString(1);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return maKH;
+    }
+    
+    //Lấy mã nhà cung cấp khi biết tên
     public String getMaNCC(String tenNCC) {
         String maNCC = "";
         command = "select id from nha_cung_cap where ten_ncc = '" + tenNCC + "'";
@@ -224,7 +283,7 @@ public class ConnectToMySQL {
             if (result.next()) {
                 maNCC = result.getString(1);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println(e);
         }
         return maNCC;
@@ -243,6 +302,143 @@ public class ConnectToMySQL {
             System.out.println(e);
         }
         return maNV;
+    }
+    
+    //Lấy số lượng sản phẩm còn trong kho
+    public int getSoLuong(String maSP) {
+        int so_luong = 0;
+        command = "select so_luong from san_pham where id = '" + maSP + "'";
+        try {
+            result = state.executeQuery(command);
+            if (result.next()) {
+                so_luong = result.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return so_luong;
+    }
+    
+    //Thay đổi số lượng sản phẩm sau khi bán và nhập
+    public void thayDoiSoLuong(String maSP, int chenhLech) {
+        int so_luong_cu = getSoLuong(maSP);
+        int so_luong_moi = so_luong_cu + chenhLech;
+        command = "update san_pham set so_luong = '" +  so_luong_moi + "' where id = '" + maSP + "'";
+        try {
+            if (state.executeUpdate(command)>0) {
+                System.out.println("Cập nhật thành công");
+            }
+            else {
+                System.out.println("Lỗi cập nhật");
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
+    
+    //Lấy mật khẩu để kiểm chứng khi đăng nhập
+    public String getPassWord(String id) {
+        String password="";
+        command = "select mat_khau from nhan_vien where id='" + id + "'";
+        try {
+            result = state.executeQuery(command);
+            if (result.next()) {
+                password = result.getString(1);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return password;
+    } 
+    
+    //Lấy dữ liệu thống kê
+    //Thống kê cơ bản
+    public DefaultTableModel thongKeCoBan(DefaultTableModel model, String table, String column) {
+        command = "select " + column + ", count(id) from " + table + " group by " + column;
+        query(model);
+        return model;
+    }
+
+    //Thống kê sản phẩm theo nhà cung cấp
+    public DefaultTableModel TKSPTheoNCC(DefaultTableModel model) {
+        command = "select ncc.ten_ncc, count(sp.id) from san_pham sp, "
+                + "nha_cung_cap ncc where sp.ncc = ncc.id group by sp.ncc";
+        query(model);
+        return model;
+    }
+    
+    //Thống kê doanh thu theo nhân viên
+    public DefaultTableModel TKDTTheoNV(DefaultTableModel model) {
+        command = "select nv.ho_ten, count(hdb.id) from hoa_don_ban hdb, nhan_vien nv "
+                + "where hdb.ma_nhan_vien = nv.id group by nv.id order by nv.id";
+        query(model);
+        return model;
+    }
+    //Lấy tông tiền cho từng nhân viên
+    public ArrayList<Integer> getTongTienTheoNV() {
+        ArrayList<Integer> listTongTien = new ArrayList<>();
+        command = "select sum(ctb.so_luong * sp.gia_tien) from hoa_don_ban hdb, "
+                + "chi_tiet_ban ctb, san_pham sp where hdb.id = ctb.ma_hoa_don " 
+                + "and ctb.ma_san_pham = sp.id group by hdb.ma_nhan_vien order by hdb.ma_nhan_vien";
+        try {
+            result = state.executeQuery(command);
+            while (result.next()) {
+                listTongTien.add(result.getInt(1));
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+   
+        return listTongTien;
+    }
+    
+    //Thống kê doanh thu theo khách hàng
+    public DefaultTableModel TKDTTheoKH(DefaultTableModel model) {
+        command = "select kh.ho_ten, count(hdb.id) from hoa_don_ban hdb, khach_hang kh "
+                + "where hdb.ma_khach_hang = kh.id group by kh.id order by kh.id";
+        query(model);
+        return model;
+    }
+    //Lấy tông tiền cho từng khách hàng
+    public ArrayList<Integer> getTongTienTheoKH() {
+        ArrayList<Integer> listTongTien = new ArrayList<>();
+        command = "select sum(ctb.so_luong * sp.gia_tien) from hoa_don_ban hdb, "
+                + "chi_tiet_ban ctb, san_pham sp where hdb.id = ctb.ma_hoa_don " 
+                + "and ctb.ma_san_pham = sp.id group by hdb.ma_khach_hang order by hdb.ma_khach_hang";
+        try {
+            result = state.executeQuery(command);
+            while (result.next()) {
+                listTongTien.add(result.getInt(1));
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+   
+        return listTongTien;
+    }
+    
+    //Thống kê doanh thu theo khách hàng
+    public DefaultTableModel TKDTTheoNgay(DefaultTableModel model) {
+        command = "select hdb.ngay_ban, count(hdb.id) from hoa_don_ban hdb group by hdb.ngay_ban";
+        query(model);
+        return model;
+    }
+    //Lấy tông tiền cho từng khách hàng
+    public ArrayList<Integer> getTongTienTheoNgay() {
+        ArrayList<Integer> listTongTien = new ArrayList<>();
+        command = "select sum(ctb.so_luong * sp.gia_tien) from hoa_don_ban hdb, "
+                + "chi_tiet_ban ctb, san_pham sp where hdb.id = ctb.ma_hoa_don " 
+                + "and ctb.ma_san_pham = sp.id group by hdb.ngay_ban";
+        try {
+            result = state.executeQuery(command);
+            while (result.next()) {
+                listTongTien.add(result.getInt(1));
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+   
+        return listTongTien;
     }
     
     //Các hàm insert
@@ -314,8 +510,27 @@ public class ConnectToMySQL {
                         "Error",JOptionPane.ERROR_MESSAGE);
             }
         } catch (HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Thêm thành công", 
-                    "Message", JOptionPane.INFORMATION_MESSAGE);
+            System.out.println(e);
+        }
+    }
+    
+    public void insertKhachHang(KhachHang khachHang) {
+        command = "insert into khach_hang value(?, ?, ?, ?, ?)";
+        try {
+            pState = con.prepareStatement(command);
+            pState.setString(1, khachHang.getId());
+            pState.setString(2, khachHang.getHoTen());
+            pState.setString(3, khachHang.getGioiTinh());
+            pState.setString(4, khachHang.getDiaChi());
+            pState.setString(5, khachHang.getSoDT());
+            if (pState.executeUpdate()>0) {
+                System.out.println("Thêm khách hàng thành công");
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "Lỗi cập nhật",
+                        "Error",JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (HeadlessException | SQLException e) {
             System.out.println(e);
         }
     }
@@ -336,8 +551,6 @@ public class ConnectToMySQL {
                         "Error",JOptionPane.ERROR_MESSAGE);
             }
         } catch (HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Thêm thành công", 
-                    "Message", JOptionPane.INFORMATION_MESSAGE);
             System.out.println(e);
         }
     }
@@ -357,8 +570,25 @@ public class ConnectToMySQL {
                         "Error",JOptionPane.ERROR_MESSAGE);
             }
         } catch (HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Thêm thành công", 
-                    "Message", JOptionPane.INFORMATION_MESSAGE);
+            System.out.println(e);
+        }
+    }
+    
+    public void insertCTHDN(ChiTietHD chiTietHD) {
+        command = "insert into chi_tiet_nhap value(?, ?, ?)";
+        try {
+            pState = con.prepareStatement(command);
+            pState.setString(1, chiTietHD.getMaHD());
+            pState.setString(2, chiTietHD.getMaSP());
+            pState.setInt(3, chiTietHD.getSoLuong());
+            if (pState.executeUpdate()>0) {
+                System.out.println("Thêm chi tiết hóa dơn thành công");
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "Lỗi cập nhật",
+                        "Error",JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (HeadlessException | SQLException e) {
             System.out.println(e);
         }
     }
@@ -379,25 +609,24 @@ public class ConnectToMySQL {
                         "Error",JOptionPane.ERROR_MESSAGE);
             }
         } catch (HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Thêm thành công", 
-                    "Message", JOptionPane.INFORMATION_MESSAGE);
             System.out.println(e);
         }
     }
     //Các hàm update
     public void updateSP(SanPham sanPham) {
         command = "update san_pham set ten_san_pham = ?,loai_san_pham = ?,ncc = ?,"
-                + " don_vi = ?, gia_tien = ?, so_luong = ?, hinh_anh = ? where id = ?";
+                + " don_vi = ?, gia_nhap = ?, gia_tien = ?, so_luong = ?, hinh_anh = ? where id = ?";
         try {
             pState = con.prepareStatement(command);
             pState.setString(1, sanPham.getTenSP());
             pState.setString(2, sanPham.getLoaiSP());
             pState.setString(3, sanPham.getNhaCC());
             pState.setString(4, sanPham.getDonVi());
-            pState.setInt(5, sanPham.getGiaTien());
-            pState.setInt(6, sanPham.getSoLuong());
-            pState.setString(7, sanPham.getHinhAnh());
-            pState.setString(8, sanPham.getId());
+            pState.setInt(5, sanPham.getGiaNhap());
+            pState.setInt(6, sanPham.getGiaTien());
+            pState.setInt(7, sanPham.getSoLuong());
+            pState.setString(8, sanPham.getHinhAnh());
+            pState.setString(9, sanPham.getId());
             if (pState.executeUpdate()>0) {
                 System.out.println("Cập nhật sản phẩm thành công");
             }
@@ -406,8 +635,6 @@ public class ConnectToMySQL {
                         "Error",JOptionPane.ERROR_MESSAGE);
             }
         } catch(HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error!",
-                    "Error",JOptionPane.ERROR_MESSAGE);
             System.out.println(e);
         }
     }
@@ -439,6 +666,28 @@ public class ConnectToMySQL {
         }
     }
     
+    public void updateKH(KhachHang khachHang) {
+        command = "update khach_hang set ho_ten = ?, gioi_tinh = ?, dia_chi = ?,"
+                + " so_dt = ? where id = ?";
+        try {
+            pState = con.prepareStatement(command);
+            pState.setString(1, khachHang.getHoTen());
+            pState.setString(2, khachHang.getGioiTinh());
+            pState.setString(3, khachHang.getDiaChi());
+            pState.setString(4, khachHang.getSoDT());
+            pState.setString(5, khachHang.getId());
+            if (pState.executeUpdate()>0) {
+                System.out.println("Cập nhật khách hàng thành công");
+            } 
+            else {
+                JOptionPane.showMessageDialog(null, "Lỗi cập nhật",
+                        "Error",JOptionPane.ERROR_MESSAGE);
+            }
+        } catch(HeadlessException | SQLException e) {
+            System.out.println(e);
+        }
+    }
+    
     public void updateHDB(HoaDonBan hdBan) {
         command = "update hoa_don_ban set ma_nhan_vien = ?, ten_khach_hang = ?,"
                 + " ngay_ban = ? where id = ?";
@@ -449,15 +698,13 @@ public class ConnectToMySQL {
             pState.setString(3, hdBan.getNgayBan());
             pState.setString(4, hdBan.getMaHDB());
             if (pState.executeUpdate()>0) {
-                System.out.println("Cập nhật phiếu mượn thành công");
+                System.out.println("Cập nhật hóa đơn bán thành công");
             } 
             else {
                 JOptionPane.showMessageDialog(null, "Lỗi cập nhật",
                         "Error",JOptionPane.ERROR_MESSAGE);
             }
         } catch(HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error!",
-                    "Error",JOptionPane.ERROR_MESSAGE);
             System.out.println(e);
         }
     }
@@ -472,15 +719,13 @@ public class ConnectToMySQL {
             pState.setString(3, hdNhap.getNgayNhap());
             pState.setString(4, hdNhap.getMaHDN());
             if (pState.executeUpdate()>0) {
-                System.out.println("Cập nhật phiếu mượn thành công");
+                System.out.println("Cập nhật hóa đơn nhập thành công");
             } 
             else {
                 JOptionPane.showMessageDialog(null, "Lỗi cập nhật",
                         "Error",JOptionPane.ERROR_MESSAGE);
             }
         } catch(HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error!",
-                    "Error",JOptionPane.ERROR_MESSAGE);
             System.out.println(e);
         }
     }
@@ -502,8 +747,6 @@ public class ConnectToMySQL {
                         "Error",JOptionPane.ERROR_MESSAGE);
             }
         } catch(HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error!",
-                    "Error",JOptionPane.ERROR_MESSAGE);
             System.out.println(e);
         }
     }
@@ -517,11 +760,28 @@ public class ConnectToMySQL {
                     "Message", JOptionPane.INFORMATION_MESSAGE);
             }
             else {
-                JOptionPane.showMessageDialog(null, "Dữ liệu không tồn tại !",
+                JOptionPane.showMessageDialog(null, "Dữ liệu không tồn tại!",
                     "Error",JOptionPane.WARNING_MESSAGE);
             }
         } catch (HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Lỗi xóa dữ liệu !",
+            JOptionPane.showMessageDialog(null, "Lỗi xóa dữ liệu!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            System.out.println(e);
+        }
+    }
+    
+    //Xóa chi tiết của một hóa đơn 
+    public void deleteCTHD(String table, String maHD) {
+        command = "delete from " + table + " where ma_hoa_don = '" + maHD + "'";
+        try {
+            if  (state.executeUpdate(command)>0) {
+                System.out.println("Xóa chi tiết hóa đơn thành công");
+            }
+            else {
+                System.out.println("Dữ liệu không tồn tại!");
+            }
+        } catch (HeadlessException | SQLException e) {
+            JOptionPane.showMessageDialog(null, "Lỗi xóa dữ liệu!",
                     "Error", JOptionPane.ERROR_MESSAGE);
             System.out.println(e);
         }
