@@ -2984,9 +2984,24 @@ public class QuanLyFrame extends javax.swing.JFrame {
                 modelTKDT = (DefaultTableModel)tableTKDT.getModel();
                 Object[] titleThang = new Object[]{"STT", "Tháng", "Số lượng đơn", "Tổng tiền"};
                 modelTKDT.setColumnIdentifiers(titleThang);
-                modelTKDT = con.TKSPTheoNCC(modelTKDT);
+                modelTKDT = con.TKDTTheoThang(modelTKDT);
+                ArrayList<Integer> listTongTienThang = con.getTongTienTheoThang();
+                for (int i=0;i<listTongTienThang.size();i++) {
+                    modelTKDT.setValueAt(listTongTienThang.get(i), i, 3);
+                }
                 setCenterRenderer(tableTKDT);
                 break;
+                case 5:
+                    modelTKDT = (DefaultTableModel)tableTKDT.getModel();
+                    Object[] titleNam = new Object[]{"STT", "Năm", "Số lượng đơn", "Tổng tiền"};
+                    modelTKDT.setColumnIdentifiers(titleNam);
+                    modelTKDT = con.TKDTTheoNam(modelTKDT);
+                    ArrayList<Integer> listTongTienNam = con.getTongTienTheoNam();
+                    for (int i=0;i<listTongTienNam.size();i++) {
+                        modelTKDT.setValueAt(listTongTienNam.get(i), i, 3);
+                    }
+                    setCenterRenderer(tableTKDT);
+                    break;
         }
     }//GEN-LAST:event_jComboBox2ActionPerformed
 

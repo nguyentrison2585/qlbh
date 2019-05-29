@@ -47,6 +47,7 @@ public class ConnectToMySQL {
     public void connect() {
         try {
             Class.forName(CLASS_NAME);
+            System.out.println(CLASS_NAME);
             con = DriverManager.getConnection(DB_URL,USER_NAME,PASSWORD);    
             state = con.createStatement();
         } catch (ClassNotFoundException | SQLException e) {
@@ -423,12 +424,54 @@ public class ConnectToMySQL {
         query(model);
         return model;
     }
+    public DefaultTableModel TKDTTheoThang(DefaultTableModel model) {
+        command = "select substring(hdb.ngay_ban,4), count(hdb.id) from hoa_don_ban hdb group by substring(hdb.ngay_ban,4)";
+        query(model);
+        return model;
+    }
+    public DefaultTableModel TKDTTheoNam(DefaultTableModel model) {
+        command = "select substring(hdb.ngay_ban,7), count(hdb.id) from hoa_don_ban hdb group by substring(hdb.ngay_ban,7)";
+        query(model);
+        return model;
+    }
     //Lấy tông tiền cho từng khách hàng
     public ArrayList<Integer> getTongTienTheoNgay() {
         ArrayList<Integer> listTongTien = new ArrayList<>();
         command = "select sum(ctb.so_luong * sp.gia_tien) from hoa_don_ban hdb, "
                 + "chi_tiet_ban ctb, san_pham sp where hdb.id = ctb.ma_hoa_don " 
                 + "and ctb.ma_san_pham = sp.id group by hdb.ngay_ban";
+        try {
+            result = state.executeQuery(command);
+            while (result.next()) {
+                listTongTien.add(result.getInt(1));
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+   
+        return listTongTien;
+    }
+    public ArrayList<Integer> getTongTienTheoThang() {
+        ArrayList<Integer> listTongTien = new ArrayList<>();
+        command = "select sum(ctb.so_luong * sp.gia_tien) from hoa_don_ban hdb, "
+                + "chi_tiet_ban ctb, san_pham sp where hdb.id = ctb.ma_hoa_don " 
+                + "and ctb.ma_san_pham = sp.id group by substring(hdb.ngay_ban,4)";
+        try {
+            result = state.executeQuery(command);
+            while (result.next()) {
+                listTongTien.add(result.getInt(1));
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+   
+        return listTongTien;
+    }
+    public ArrayList<Integer> getTongTienTheoNam() {
+        ArrayList<Integer> listTongTien = new ArrayList<>();
+        command = "select sum(ctb.so_luong * sp.gia_tien) from hoa_don_ban hdb, "
+                + "chi_tiet_ban ctb, san_pham sp where hdb.id = ctb.ma_hoa_don " 
+                + "and ctb.ma_san_pham = sp.id group by substring(hdb.ngay_ban,7)";
         try {
             result = state.executeQuery(command);
             while (result.next()) {
