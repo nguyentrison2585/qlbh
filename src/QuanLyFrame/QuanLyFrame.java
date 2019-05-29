@@ -2969,7 +2969,7 @@ public class QuanLyFrame extends javax.swing.JFrame {
                 Object[] titleNgay = new Object[]{"STT", "Ngày", "Số lượng đơn", "Tổng tiền"};
                 modelTKDT.setColumnIdentifiers(titleNgay);
                 modelTKDT = con.TKDTTheoNgay(modelTKDT);
-                ArrayList<Integer> listTongTienNgay = con.getTongTienTheoKH();
+                ArrayList<Integer> listTongTienNgay = con.getTongTienTheoNgay();
                 for (int i=0;i<listTongTienNgay.size();i++) {
                     modelTKDT.setValueAt(listTongTienNgay.get(i), i, 3);
                 }
