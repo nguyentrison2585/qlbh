@@ -606,7 +606,7 @@ public class QuanLyFrame extends javax.swing.JFrame {
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cbbTKSP_ncc, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cbbTKSP_ncc, 0, 152, Short.MAX_VALUE)
                     .addComponent(cbbTKSP_loai_sp, 0, 144, Short.MAX_VALUE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGap(10, 10, 10)
@@ -632,7 +632,7 @@ public class QuanLyFrame extends javax.swing.JFrame {
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cbbTKSP_ncc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel11))
-                .addGap(0, 39, Short.MAX_VALUE))
+                .addGap(0, 19, Short.MAX_VALUE))
         );
 
         jPanel8.setBackground(new java.awt.Color(185, 204, 255));
@@ -716,7 +716,7 @@ public class QuanLyFrame extends javax.swing.JFrame {
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -792,7 +792,7 @@ public class QuanLyFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtTKNV_ten)
-                    .addComponent(cbbTKNV_GT, 0, 147, Short.MAX_VALUE))
+                    .addComponent(cbbTKNV_GT, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -2168,7 +2168,7 @@ public class QuanLyFrame extends javax.swing.JFrame {
                                     .addComponent(jLabel56, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE))
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(txtNVN, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
+                                    .addComponent(txtNVN)
                                     .addComponent(cbbNhaCC_HDN, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -2271,6 +2271,11 @@ public class QuanLyFrame extends javax.swing.JFrame {
 
         jButton6.setForeground(new java.awt.Color(0, 204, 0));
         jButton6.setText("Xuất thống kê");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel15Layout = new javax.swing.GroupLayout(jPanel15);
         jPanel15.setLayout(jPanel15Layout);
@@ -2280,7 +2285,7 @@ public class QuanLyFrame extends javax.swing.JFrame {
                 .addGap(60, 60, 60)
                 .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))
+                    .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(65, Short.MAX_VALUE))
         );
         jPanel15Layout.setVerticalGroup(
@@ -2969,7 +2974,7 @@ public class QuanLyFrame extends javax.swing.JFrame {
                 Object[] titleNgay = new Object[]{"STT", "Ngày", "Số lượng đơn", "Tổng tiền"};
                 modelTKDT.setColumnIdentifiers(titleNgay);
                 modelTKDT = con.TKDTTheoNgay(modelTKDT);
-                ArrayList<Integer> listTongTienNgay = con.getTongTienTheoKH();
+                ArrayList<Integer> listTongTienNgay = con.getTongTienTheoNgay();
                 for (int i=0;i<listTongTienNgay.size();i++) {
                     modelTKDT.setValueAt(listTongTienNgay.get(i), i, 3);
                 }
@@ -3006,6 +3011,10 @@ public class QuanLyFrame extends javax.swing.JFrame {
             con.getTKHDN_Ngay(modelHDN, cbbTKHDN_Ngay.getSelectedItem().toString());
         }
     }//GEN-LAST:event_cbbTKHDN_NgayActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton6ActionPerformed
     
     
     public void resetSP() {

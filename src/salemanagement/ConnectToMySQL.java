@@ -30,10 +30,10 @@ import model.SanPham;
  */
 public class ConnectToMySQL {
     public Connection con;
-    public final String CLASS_NAME = "com.mysql.cj.jdbc.Driver";
+    public final String CLASS_NAME = "com.mysql.jdbc.Driver";
     public final String DB_URL = "jdbc:mysql://localhost:3306/qlbh";
     public final String USER_NAME = "root";
-    public final String PASSWORD = "sonditnhon";
+    public final String PASSWORD = "123456a@";
     public String command;
     public Statement state;
     public PreparedStatement pState;
