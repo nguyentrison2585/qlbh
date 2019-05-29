@@ -119,7 +119,7 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="jPanel8" max="32767" attributes="0"/>
                               </Group>
-                              <Component id="jScrollPane1" pref="0" max="32767" attributes="0"/>
+                              <Component id="jScrollPane1" pref="334" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jPanel4" min="-2" max="-2" attributes="0"/>
@@ -572,7 +572,7 @@
                               </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="cbbTKSP_ncc" pref="152" max="32767" attributes="0"/>
+                                  <Component id="cbbTKSP_ncc" max="32767" attributes="0"/>
                                   <Component id="cbbTKSP_loai_sp" pref="144" max="32767" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
                                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
@@ -605,7 +605,7 @@
                                   <Component id="cbbTKSP_ncc" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="jLabel11" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="19" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="39" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -905,7 +905,7 @@
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="txtTKNV_ten" max="32767" attributes="0"/>
-                                  <Component id="cbbTKNV_GT" max="32767" attributes="0"/>
+                                  <Component id="cbbTKNV_GT" pref="147" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -3113,7 +3113,7 @@
                                                   </Group>
                                                   <EmptySpace type="separate" max="-2" attributes="0"/>
                                                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                                      <Component id="txtNVN" max="32767" attributes="0"/>
+                                                      <Component id="txtNVN" pref="150" max="32767" attributes="0"/>
                                                       <Component id="cbbNhaCC_HDN" max="32767" attributes="0"/>
                                                   </Group>
                                               </Group>
@@ -3460,7 +3460,7 @@
                                   <EmptySpace min="-2" pref="60" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                       <Component id="jComboBox2" max="32767" attributes="0"/>
-                                      <Component id="jButton6" max="32767" attributes="0"/>
+                                      <Component id="jButton6" pref="140" max="32767" attributes="0"/>
                                   </Group>
                                   <EmptySpace pref="65" max="32767" attributes="0"/>
                               </Group>
@@ -3506,9 +3506,6 @@
                             </Property>
                             <Property name="text" type="java.lang.String" value="Xu&#x1ea5;t th&#x1ed1;ng k&#xea;"/>
                           </Properties>
-                          <Events>
-                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton6ActionPerformed"/>
-                          </Events>
                         </Component>
                       </SubComponents>
                     </Container>
